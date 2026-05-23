@@ -11,3 +11,10 @@
 **What I learned:** How to structure high-impact, direct copywriting that addresses target user pain points under strict constraints.
 **Blockers / what I'm stuck on:** Sourcing and booking busy founders for calls can take time; sent out 8 personalized DMs to secure the 3 required slots.
 **Plan for tomorrow:** Conduct and record the three user interviews, finalize `USER_INTERVIEWS.md`, and start writing the backend database schema and API logic for lead storage.
+
+## Day 3 — 2026-05-23
+**Hours worked:** 2.5
+**What I did:** Created a Supabase Postgres database instance and initialized the schema layout. Installed database and transactional email SDKs. Built a robust lead-capture API endpoint in Next.js (`src/app/api/leads/route.ts`) featuring a client honeypot spam protection wrapper, input validation protocols, and structured email confirmations via Resend.
+**What I learned:** How to design secure API logic that gracefully handles third-party failures (email delivery errors) without blocking core application writes.
+**Blockers / what I'm stuck on:** None. Client-to-server schema communication tests executed successfully.
+**Plan for tomorrow:** Build the core mathematical audit engine logic in TypeScript and write unit tests for each optimization calculation rule.
