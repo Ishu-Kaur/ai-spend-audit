@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, lead: data[0] });
 
-  } catch (err: any) {
+  } catch (err) {
     console.error('Internal Server Error:', err);
     return NextResponse.json(
       { error: 'Internal Server Error. Please try again later.' },
