@@ -12,10 +12,36 @@ const AVAILABLE_TOOLS = [
 ];
 
 export default function Home() {
-  // --- STATE MANAGEMENT ---
-  const [teamSize, setTeamSize] = useState<number>(1);
-  const [useCase, setUseCase] = useState<string>('mixed');
-  const [selectedTools, setSelectedTools] = useState<{ [key: string]: { plan: string; seats: number; monthlySpend: number } }>({});
+  // --- STATE MANAGEMENT (With Lazy LocalStorage Initialization) ---
+  const [teamSize, setTeamSize] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('audit_teamSize');
+      return saved ? parseInt(saved) : 1;
+    }
+    return 1;
+  });
+
+  const [useCase, setUseCase] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('audit_useCase') || 'mixed';
+    }
+    return 'mixed';
+  });
+
+  const [selectedTools, setSelectedTools] = useState<{ [key: string]: { plan: string; seats: number; monthlySpend: number } }>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('audit_selectedTools');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse local storage tools:', e);
+        }
+      }
+    }
+    return {};
+  });
+
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [isAudited, setIsAudited] = useState<boolean>(false);
 
@@ -27,23 +53,8 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  // --- LOCAL STORAGE PERSISTENCE ---
-  useEffect(() => {
-    const savedTeamSize = localStorage.getItem('audit_teamSize');
-    const savedUseCase = localStorage.getItem('audit_useCase');
-    const savedTools = localStorage.getItem('audit_selectedTools');
-
-    if (savedTeamSize) setTeamSize(parseInt(savedTeamSize));
-    if (savedUseCase) setUseCase(savedUseCase);
-    if (savedTools) {
-      try {
-        setSelectedTools(JSON.parse(savedTools));
-      } catch (e) {
-        console.error('Failed to parse local storage tools:', e);
-      }
-    }
-  }, []);
-
+  // --- LOCAL STORAGE WRITER ---
+  // We keep this block to save state changes, but we have removed the reader useEffect entirely.
   useEffect(() => {
     localStorage.setItem('audit_teamSize', teamSize.toString());
     localStorage.setItem('audit_useCase', useCase);
