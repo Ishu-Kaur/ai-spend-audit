@@ -66,7 +66,7 @@ export default function Home() {
     setSelectedTools(updated);
   };
 
-  const handleToolChange = (toolId: string, field: 'plan' | 'seats' | 'monthlySpend', value: any) => {
+  const handleToolChange = (toolId: string, field: 'plan' | 'seats' | 'monthlySpend', value: string | number) => {
     const updated = { ...selectedTools };
     if (updated[toolId]) {
       updated[toolId] = {
@@ -87,7 +87,7 @@ export default function Home() {
 
     const auditInput: AuditInput = {
       teamSize,
-      primaryUseCase: useCase as any,
+      primaryUseCase: useCase as 'coding' | 'writing' | 'data' | 'research' | 'mixed',
       tools: toolList
     };
 
@@ -139,7 +139,7 @@ export default function Home() {
         {/* HERO HEADER */}
         <header className="text-center space-y-4">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-            Stop Overpaying for AI. Audit Your Team's Tool Spend.
+            Stop Overpaying for AI. Audit Your Team{"'"}s Tool Spend.
           </h1>
           <p className="text-slate-400 max-w-xl mx-auto">
             Startups lose thousands on idle AI seats and overlapping plans. Get an instant, mathematically defensible audit of your actual software spend in 60 seconds.
