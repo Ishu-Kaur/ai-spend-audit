@@ -44,6 +44,10 @@ export default function Home() {
 
   const [auditResult, setAuditResult] = useState<AuditResult | null>(null);
   const [isAudited, setIsAudited] = useState<boolean>(false);
+  
+  // AI Summary States
+  const [aiSummary, setAiSummary] = useState<string>('');
+  const [isLoadingSummary, setIsLoadingSummary] = useState<boolean>(false);
 
   // Lead capture states
   const [email, setEmail] = useState<string>('');
@@ -54,7 +58,6 @@ export default function Home() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   // --- LOCAL STORAGE WRITER ---
-  // We keep this block to save state changes, but we have removed the reader useEffect entirely.
   useEffect(() => {
     localStorage.setItem('audit_teamSize', teamSize.toString());
     localStorage.setItem('audit_useCase', useCase);
@@ -88,7 +91,7 @@ export default function Home() {
     }
   };
 
-  const triggerAudit = () => {
+  const triggerAudit = async () => {
     const toolList: ToolInput[] = Object.keys(selectedTools).map(key => ({
       toolId: key,
       plan: selectedTools[key].plan,
@@ -105,8 +108,35 @@ export default function Home() {
     const results = runAudit(auditInput);
     setAuditResult(results);
     setIsAudited(true);
-  };
 
+    // Fetch the AI-Generated Summary from our secure endpoint
+    setIsLoadingSummary(true);
+    setAiSummary('');
+    try {
+      const res = await fetch('/api/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auditResult: results,
+          teamSize,
+          primaryUseCase: useCase
+        })
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { summary?: string } | null;
+        if (data && data.summary) {
+          setAiSummary(data.summary);
+        }
+      } else {
+        console.warn('API returned non-ok status. Fallback should trigger.');
+      }
+    } catch (err) {
+      console.error('Failed to load AI summary:', err);
+    } finally {
+      setIsLoadingSummary(false);
+    }
+  };
+  
   const submitLead = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !auditResult) return;
@@ -286,6 +316,23 @@ export default function Home() {
                 <div className="text-sm font-semibold tracking-wide uppercase text-cyan-400">Total Annual Savings</div>
                 <div className="text-4xl md:text-5xl font-extrabold">${auditResult?.annualSavings}</div>
               </div>
+            </div>
+
+            {/* AI-GENERATED PERSONALIZED SUMMARY */}
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 md:p-8 space-y-4">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <span>🤖</span> AI-Generated Personalized Summary
+              </h2>
+              {isLoadingSummary ? (
+                <div className="flex items-center gap-3 text-slate-400">
+                  <div className="animate-spin h-5 w-5 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
+                  <span>Claude is analyzing your software spend...</span>
+                </div>
+              ) : (
+                <p className="text-slate-300 leading-relaxed italic">
+                  {aiSummary || "No summary available for this configuration."}
+                </p>
+              )}
             </div>
 
             {/* PER-TOOL BREAKDOWN */}
