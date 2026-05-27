@@ -12,6 +12,16 @@ const AVAILABLE_TOOLS = [
 ];
 
 export default function Home() {
+  // --- HYDRATION GUARD ---
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
+ useEffect(() => {
+  const timer = setTimeout(() => {
+    setIsMounted(true);
+  }, 0);
+  return () => clearTimeout(timer);
+}, []);
+
   // --- STATE MANAGEMENT (With Lazy LocalStorage Initialization) ---
   const [teamSize, setTeamSize] = useState<number>(() => {
     if (typeof window !== 'undefined') {
@@ -171,6 +181,17 @@ export default function Home() {
       setIsSubmitting(false);
     }
   };
+
+  // --- RENDERING PROTECTION ---
+  // If the page has not mounted on the client, render a themed loading spinner.
+  // This completely eliminates any Next.js hydration mismatches!
+  if (!isMounted) {
+    return (
+      <main className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full"></div>
+      </main>
+    );
+  }
 
   // --- RENDERING UI ---
   return (
